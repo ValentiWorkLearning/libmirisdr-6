@@ -20,8 +20,11 @@
 ########################################################################
 # Project setup
 ########################################################################
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10...3.27)
 project(mirisdr C)
+
+# Set module path early for find_package to work
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules)
 
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -42,8 +45,6 @@ if(NOT CMAKE_BUILD_TYPE)
    message(STATUS "Build type not specified: defaulting to release.")
 endif(NOT CMAKE_BUILD_TYPE)
 set(CMAKE_BUILD_TYPE ${CMAKE_BUILD_TYPE} CACHE STRING "")
-
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
 
 # Set the version information here
 set(VERSION_INFO_MAJOR_VERSION 4) # increment major on api compatibility changes
@@ -67,19 +68,31 @@ endif()
 # Find build dependencies
 ########################################################################
 find_package(PkgConfig)
-find_package(LibUSB)
-set(THREADS_USE_PTHREADS_WIN32 true)
-find_package(Threads)
+
+# Try to find LibUSB using pkg-config first, then the custom module
+if(NOT LibUSB_FOUND)
+    find_package(LibUSB QUIET)
+endif()
 
 if(NOT LIBUSB_FOUND)
-    message(FATAL_ERROR "LibUSB 1.0 required to compile MiriSDR")
+    # Try pkg-config as fallback
+    if(PkgConfig_FOUND)
+        pkg_check_modules(LIBUSB libusb-1.0)
+    endif()
 endif()
+
+if(NOT LIBUSB_FOUND AND NOT LIBUSB_LIBRARIES)
+    message(FATAL_ERROR "LibUSB 1.0 required to compile MiriSDR. Install it via: brew install libusb (macOS) or apt install libusb-1.0-0-dev (Linux)")
+endif()
+
+set(THREADS_USE_PTHREADS_WIN32 true)
+find_package(Threads)
 
 ########################################################################
 # Setup the include and linker paths
 ########################################################################
 include_directories(
-    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_LIST_DIR}/include
     ${LIBUSB_INCLUDE_DIR}
 )
 
@@ -94,7 +107,7 @@ include_directories(
 # Create uninstall target
 ########################################################################
 configure_file(
-    ${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in
+    ${CMAKE_CURRENT_LIST_DIR}/cmake/cmake_uninstall.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
 @ONLY)
 
@@ -154,6 +167,37 @@ CONFIGURE_FILE(
 INSTALL(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/libmirisdr.pc
     DESTINATION lib${LIB_SUFFIX}/pkgconfig
+)
+
+########################################################################
+# Export targets for FetchContent and find_package
+########################################################################
+# Configure and install package config file
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/mirisdrConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/mirisdrConfig.cmake
+    @ONLY
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/mirisdrConfig.cmake
+    DESTINATION lib${LIB_SUFFIX}/cmake/mirisdr
+)
+
+# Export build tree targets for FetchContent and development
+export(TARGETS mirisdr_shared mirisdr_static
+    NAMESPACE mirisdr::
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/mirisdrTargets.cmake
+)
+
+# Register the build tree with CMake so find_package can find it
+export(PACKAGE mirisdr)
+
+# Export installed targets
+install(EXPORT mirisdr_targets
+    NAMESPACE mirisdr::
+    FILE mirisdrTargets.cmake
+    DESTINATION lib${LIB_SUFFIX}/cmake/mirisdr
 )
 
 ########################################################################

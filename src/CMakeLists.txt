@@ -17,6 +17,9 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 
+# Ensure dependencies are available in this scope
+find_package(Threads REQUIRED)
+
 ########################################################################
 # Setup library
 ########################################################################
@@ -24,14 +27,31 @@ add_library(mirisdr_shared SHARED
     libmirisdr.c
 )
 
+# Find or create imported target for libusb if needed
+if(NOT TARGET libusb)
+    if(LibUSB_FOUND AND LIBUSB_INCLUDE_DIR AND LIBUSB_LIBRARIES)
+        add_library(libusb INTERFACE IMPORTED)
+        set_target_properties(libusb PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${LIBUSB_INCLUDE_DIR}"
+            INTERFACE_LINK_LIBRARIES "${LIBUSB_LIBRARIES}"
+        )
+    endif()
+endif()
+
 target_link_libraries(mirisdr_shared
-    ${LIBUSB_LIBRARIES}
+    PRIVATE ${LIBUSB_LIBRARIES} Threads::Threads
 )
 
 set_target_properties(mirisdr_shared PROPERTIES DEFINE_SYMBOL "mirisdr_EXPORTS")
 set_target_properties(mirisdr_shared PROPERTIES OUTPUT_NAME mirisdr)
 set_target_properties(mirisdr_shared PROPERTIES SOVERSION ${MAJOR_VERSION})
 set_target_properties(mirisdr_shared PROPERTIES VERSION ${LIBVER})
+
+# Set up public include directory
+target_include_directories(mirisdr_shared PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+    $<INSTALL_INTERFACE:include>
+)
 
 add_library(mirisdr_static STATIC
     libmirisdr.c
@@ -44,7 +64,7 @@ add_library(libgetopt_static STATIC
 endif()
 
 target_link_libraries(mirisdr_static
-    ${LIBUSB_LIBRARIES}
+    PRIVATE ${LIBUSB_LIBRARIES} Threads::Threads
 )
 
 set_property(TARGET mirisdr_static APPEND PROPERTY COMPILE_DEFINITIONS "mirisdr_STATIC" )
@@ -54,6 +74,12 @@ if(NOT WIN32)
 set_target_properties(mirisdr_static PROPERTIES OUTPUT_NAME mirisdr)
 endif()
 
+# Set up public include directory
+target_include_directories(mirisdr_static PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+    $<INSTALL_INTERFACE:include>
+)
+
 ########################################################################
 # Build utility
 ########################################################################
@@ -61,31 +87,38 @@ add_executable(miri_sdr miri_sdr.c)
 add_executable(miri_fm miri_fm.c)
 set(INSTALL_TARGETS mirisdr_shared mirisdr_static miri_sdr miri_fm)
 
-target_link_libraries(miri_sdr mirisdr_shared
+target_link_libraries(miri_sdr PRIVATE mirisdr_shared
     ${LIBUSB_LIBRARIES}
-    ${CMAKE_THREAD_LIBS_INIT}
+    Threads::Threads
 )
 
-target_link_libraries(miri_fm mirisdr_shared
+target_link_libraries(miri_fm PRIVATE mirisdr_shared
     ${LIBUSB_LIBRARIES}
-    ${CMAKE_THREAD_LIBS_INIT}
+    Threads::Threads
 )
 
 if(UNIX)
-target_link_libraries(miri_fm m)
+target_link_libraries(miri_fm PRIVATE m)
 endif()
 
 if(WIN32)
-target_link_libraries(miri_sdr libgetopt_static)
-target_link_libraries(miri_fm libgetopt_static)
+target_link_libraries(miri_sdr PRIVATE libgetopt_static)
+target_link_libraries(miri_fm PRIVATE libgetopt_static)
 set_property(TARGET miri_sdr APPEND PROPERTY COMPILE_DEFINITIONS "mirisdr_STATIC" )
 set_property(TARGET miri_fm APPEND PROPERTY COMPILE_DEFINITIONS "mirisdr_STATIC" )
 endif()
 
 ########################################################################
+# Create namespace aliases for use in both build tree and via find_package
+########################################################################
+add_library(mirisdr::mirisdr_shared ALIAS mirisdr_shared)
+add_library(mirisdr::mirisdr_static ALIAS mirisdr_static)
+
+########################################################################
 # Install built library files & utilities
 ########################################################################
-install(TARGETS ${INSTALL_TARGETS}
+install(TARGETS mirisdr_shared mirisdr_static
+    EXPORT mirisdr_targets
     LIBRARY DESTINATION lib${LIB_SUFFIX} # .so/.dylib file
     ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
     RUNTIME DESTINATION bin              # .dll file

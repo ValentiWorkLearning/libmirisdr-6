@@ -1,0 +1,30 @@
+@PACKAGE_INIT@
+
+# Metadata
+set(mirisdr_VERSION @VERSION@)
+set(mirisdr_VERSION_MAJOR @VERSION_INFO_MAJOR_VERSION@)
+set(mirisdr_VERSION_MINOR @VERSION_INFO_MINOR_VERSION@)
+set(mirisdr_VERSION_PATCH @VERSION_INFO_PATCH_VERSION@)
+
+# Find dependencies
+find_package(LibUSB QUIET)
+if(NOT LIBUSB_FOUND)
+    if(PkgConfig_FOUND OR TRUE)
+        find_package(PkgConfig QUIET)
+        if(PkgConfig_FOUND)
+            pkg_check_modules(LIBUSB QUIET libusb-1.0)
+        endif()
+    endif()
+endif()
+
+find_package(Threads QUIET)
+
+# Include targets if they exist
+if(NOT TARGET mirisdr::mirisdr_shared)
+    include("${CMAKE_CURRENT_LIST_DIR}/mirisdrTargets.cmake" OPTIONAL RESULT_VARIABLE _targets_file)
+    if(NOT _targets_file)
+        message(SEND_ERROR "mirisdr targets file not found: ${CMAKE_CURRENT_LIST_DIR}/mirisdrTargets.cmake")
+    endif()
+endif()
+
+check_required_components(mirisdr)

@@ -1,4 +1,4 @@
-LibMiriSDR-4
+LibMiriSDR-6
 ============
 
 This is (yet) another flavour of libmirisdr initiated with original libmirisdr-2 from Miroslav Slugen and additions of Leif Asbrink SM5BSZ in libmirisdr-3-bsz. Bear with me for the missing special characters on both authors names.
