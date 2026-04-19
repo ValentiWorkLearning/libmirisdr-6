@@ -24,7 +24,7 @@ cmake_minimum_required(VERSION 3.10...3.27)
 project(mirisdr C)
 
 # Set module path early for find_package to work
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake/Modules)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake/Modules)
 
 # use, i.e. don't skip the full RPATH for the build tree
 set(CMAKE_SKIP_BUILD_RPATH  FALSE)
@@ -92,7 +92,7 @@ find_package(Threads)
 # Setup the include and linker paths
 ########################################################################
 include_directories(
-    ${CMAKE_SOURCE_DIR}/include
+    ${CMAKE_CURRENT_LIST_DIR}/include
     ${LIBUSB_INCLUDE_DIR}
 )
 
@@ -107,7 +107,7 @@ include_directories(
 # Create uninstall target
 ########################################################################
 configure_file(
-    ${CMAKE_SOURCE_DIR}/cmake/cmake_uninstall.cmake.in
+    ${CMAKE_CURRENT_LIST_DIR}/cmake/cmake_uninstall.cmake.in
     ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
 @ONLY)
 
