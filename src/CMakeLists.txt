@@ -109,6 +109,12 @@ set_property(TARGET miri_fm APPEND PROPERTY COMPILE_DEFINITIONS "mirisdr_STATIC"
 endif()
 
 ########################################################################
+# Create namespace aliases for use in both build tree and via find_package
+########################################################################
+add_library(mirisdr::mirisdr_shared ALIAS mirisdr_shared)
+add_library(mirisdr::mirisdr_static ALIAS mirisdr_static)
+
+########################################################################
 # Install built library files & utilities
 ########################################################################
 install(TARGETS mirisdr_shared mirisdr_static
