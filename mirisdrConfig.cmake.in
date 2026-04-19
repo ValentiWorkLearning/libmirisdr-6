@@ -1,0 +1,11 @@
+@PACKAGE_INIT@
+
+# Metadata
+set(mirisdr_VERSION @VERSION@)
+set(mirisdr_VERSION_MAJOR @VERSION_INFO_MAJOR_VERSION@)
+set(mirisdr_VERSION_MINOR @VERSION_INFO_MINOR_VERSION@)
+set(mirisdr_VERSION_PATCH @VERSION_INFO_PATCH_VERSION@)
+
+include("${CMAKE_CURRENT_LIST_DIR}/mirisdrTargets.cmake")
+
+check_required_components(mirisdr)

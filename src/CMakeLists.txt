@@ -85,7 +85,8 @@ endif()
 ########################################################################
 # Install built library files & utilities
 ########################################################################
-install(TARGETS ${INSTALL_TARGETS}
+install(TARGETS mirisdr_shared mirisdr_static
+    EXPORT mirisdr_targets
     LIBRARY DESTINATION lib${LIB_SUFFIX} # .so/.dylib file
     ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
     RUNTIME DESTINATION bin              # .dll file

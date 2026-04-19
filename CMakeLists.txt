@@ -157,6 +157,32 @@ INSTALL(
 )
 
 ########################################################################
+# Export targets for FetchContent and find_package
+########################################################################
+export(TARGETS mirisdr_shared mirisdr_static
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/mirisdrTargets.cmake
+    NAMESPACE mirisdr::
+)
+
+# Configure and install package config file
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/mirisdrConfig.cmake.in
+    ${CMAKE_CURRENT_BINARY_DIR}/mirisdrConfig.cmake
+    @ONLY
+)
+
+install(FILES
+    ${CMAKE_CURRENT_BINARY_DIR}/mirisdrConfig.cmake
+    DESTINATION lib${LIB_SUFFIX}/cmake/mirisdr
+)
+
+install(EXPORT mirisdr_targets
+    NAMESPACE mirisdr::
+    FILE mirisdrTargets.cmake
+    DESTINATION lib${LIB_SUFFIX}/cmake/mirisdr
+)
+
+########################################################################
 # Print Summary
 ########################################################################
 MESSAGE(STATUS "Building for version: ${VERSION} / ${LIBVER}")
