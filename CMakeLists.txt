@@ -172,11 +172,6 @@ INSTALL(
 ########################################################################
 # Export targets for FetchContent and find_package
 ########################################################################
-export(TARGETS mirisdr_shared mirisdr_static
-    FILE ${CMAKE_CURRENT_BINARY_DIR}/mirisdrTargets.cmake
-    NAMESPACE mirisdr::
-)
-
 # Configure and install package config file
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/mirisdrConfig.cmake.in
@@ -189,6 +184,16 @@ install(FILES
     DESTINATION lib${LIB_SUFFIX}/cmake/mirisdr
 )
 
+# Export build tree targets for FetchContent and development
+export(TARGETS mirisdr_shared mirisdr_static
+    NAMESPACE mirisdr::
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/mirisdrTargets.cmake
+)
+
+# Register the build tree with CMake so find_package can find it
+export(PACKAGE mirisdr)
+
+# Export installed targets
 install(EXPORT mirisdr_targets
     NAMESPACE mirisdr::
     FILE mirisdrTargets.cmake

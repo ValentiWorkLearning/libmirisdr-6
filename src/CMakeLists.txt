@@ -33,6 +33,12 @@ set_target_properties(mirisdr_shared PROPERTIES OUTPUT_NAME mirisdr)
 set_target_properties(mirisdr_shared PROPERTIES SOVERSION ${MAJOR_VERSION})
 set_target_properties(mirisdr_shared PROPERTIES VERSION ${LIBVER})
 
+# Set up public include directory
+target_include_directories(mirisdr_shared PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+    $<INSTALL_INTERFACE:include>
+)
+
 add_library(mirisdr_static STATIC
     libmirisdr.c
 )
@@ -53,6 +59,12 @@ if(NOT WIN32)
 # Force same library filename for static and shared variants of the library
 set_target_properties(mirisdr_static PROPERTIES OUTPUT_NAME mirisdr)
 endif()
+
+# Set up public include directory
+target_include_directories(mirisdr_static PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
+    $<INSTALL_INTERFACE:include>
+)
 
 ########################################################################
 # Build utility
