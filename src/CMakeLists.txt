@@ -24,8 +24,19 @@ add_library(mirisdr_shared SHARED
     libmirisdr.c
 )
 
+# Find or create imported target for libusb if needed
+if(NOT TARGET libusb)
+    if(LibUSB_FOUND AND LIBUSB_INCLUDE_DIR AND LIBUSB_LIBRARIES)
+        add_library(libusb INTERFACE IMPORTED)
+        set_target_properties(libusb PROPERTIES
+            INTERFACE_INCLUDE_DIRECTORIES "${LIBUSB_INCLUDE_DIR}"
+            INTERFACE_LINK_LIBRARIES "${LIBUSB_LIBRARIES}"
+        )
+    endif()
+endif()
+
 target_link_libraries(mirisdr_shared
-    ${LIBUSB_LIBRARIES}
+    PRIVATE libusb Threads::Threads
 )
 
 set_target_properties(mirisdr_shared PROPERTIES DEFINE_SYMBOL "mirisdr_EXPORTS")
@@ -50,7 +61,7 @@ add_library(libgetopt_static STATIC
 endif()
 
 target_link_libraries(mirisdr_static
-    ${LIBUSB_LIBRARIES}
+    PRIVATE libusb Threads::Threads
 )
 
 set_property(TARGET mirisdr_static APPEND PROPERTY COMPILE_DEFINITIONS "mirisdr_STATIC" )
@@ -73,14 +84,14 @@ add_executable(miri_sdr miri_sdr.c)
 add_executable(miri_fm miri_fm.c)
 set(INSTALL_TARGETS mirisdr_shared mirisdr_static miri_sdr miri_fm)
 
-target_link_libraries(miri_sdr mirisdr_shared
-    ${LIBUSB_LIBRARIES}
-    ${CMAKE_THREAD_LIBS_INIT}
+target_link_libraries(miri_sdr PRIVATE mirisdr_shared
+    libusb
+    Threads::Threads
 )
 
-target_link_libraries(miri_fm mirisdr_shared
-    ${LIBUSB_LIBRARIES}
-    ${CMAKE_THREAD_LIBS_INIT}
+target_link_libraries(miri_fm PRIVATE mirisdr_shared
+    libusb
+    Threads::Threads
 )
 
 if(UNIX)
