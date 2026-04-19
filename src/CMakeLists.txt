@@ -17,6 +17,9 @@
 # the Free Software Foundation, Inc., 51 Franklin Street,
 # Boston, MA 02110-1301, USA.
 
+# Ensure dependencies are available in this scope
+find_package(Threads REQUIRED)
+
 ########################################################################
 # Setup library
 ########################################################################
