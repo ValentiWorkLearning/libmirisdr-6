@@ -95,12 +95,12 @@ target_link_libraries(miri_fm PRIVATE mirisdr_shared
 )
 
 if(UNIX)
-target_link_libraries(miri_fm m)
+target_link_libraries(miri_fm PRIVATE m)
 endif()
 
 if(WIN32)
-target_link_libraries(miri_sdr libgetopt_static)
-target_link_libraries(miri_fm libgetopt_static)
+target_link_libraries(miri_sdr PRIVATE libgetopt_static)
+target_link_libraries(miri_fm PRIVATE libgetopt_static)
 set_property(TARGET miri_sdr APPEND PROPERTY COMPILE_DEFINITIONS "mirisdr_STATIC" )
 set_property(TARGET miri_fm APPEND PROPERTY COMPILE_DEFINITIONS "mirisdr_STATIC" )
 endif()
