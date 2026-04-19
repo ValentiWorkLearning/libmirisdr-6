@@ -39,7 +39,7 @@ if(NOT TARGET libusb)
 endif()
 
 target_link_libraries(mirisdr_shared
-    PRIVATE libusb Threads::Threads
+    PRIVATE ${LIBUSB_LIBRARIES} Threads::Threads
 )
 
 set_target_properties(mirisdr_shared PROPERTIES DEFINE_SYMBOL "mirisdr_EXPORTS")
@@ -64,7 +64,7 @@ add_library(libgetopt_static STATIC
 endif()
 
 target_link_libraries(mirisdr_static
-    PRIVATE libusb Threads::Threads
+    PRIVATE ${LIBUSB_LIBRARIES} Threads::Threads
 )
 
 set_property(TARGET mirisdr_static APPEND PROPERTY COMPILE_DEFINITIONS "mirisdr_STATIC" )
@@ -88,12 +88,12 @@ add_executable(miri_fm miri_fm.c)
 set(INSTALL_TARGETS mirisdr_shared mirisdr_static miri_sdr miri_fm)
 
 target_link_libraries(miri_sdr PRIVATE mirisdr_shared
-    libusb
+    ${LIBUSB_LIBRARIES}
     Threads::Threads
 )
 
 target_link_libraries(miri_fm PRIVATE mirisdr_shared
-    libusb
+    ${LIBUSB_LIBRARIES}
     Threads::Threads
 )
 
