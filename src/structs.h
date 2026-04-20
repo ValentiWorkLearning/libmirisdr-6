@@ -102,5 +102,7 @@ struct mirisdr_dev {
     uint8_t             *samples;
     int                 samples_size;
     int                 sync_loss_cnt;
+    volatile int xfers_in_flight;
+    volatile int async_shutdown_requested;
 };
 
