@@ -282,7 +282,7 @@ int main(int argc, char **argv)
 	fprintf(stderr, "Using device %d: %s\n",
 		dev_index, mirisdr_get_device_name(dev_index));
 
-	r = mirisdr_open(&dev, dev_index);
+	r = mirisdr_open(&dev, dev_index, MIRISDR_TRANSFER_ISOC);
 	if (r < 0) {
 		fprintf(stderr, "Failed to open mirisdr device #%d.\n", dev_index);
 		exit(1);
