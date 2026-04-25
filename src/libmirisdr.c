@@ -53,7 +53,7 @@
 #include "soft.c"
 #include "sync.c"
 
-int mirisdr_setup (mirisdr_dev_t **out_dev, mirisdr_dev_t *dev) {
+int mirisdr_setup (mirisdr_dev_t **out_dev, mirisdr_dev_t *dev, mirisdr_transfer_backend_t transfer) {
     int r;
 
     if (libusb_kernel_driver_active(dev->dh, 0) == 1) {
@@ -113,11 +113,7 @@ int mirisdr_setup (mirisdr_dev_t **out_dev, mirisdr_dev_t *dev) {
     dev->hw_flavour = MIRISDR_HW_DEFAULT;
 
     /* ISOC is more stable but works only on Unix systems */
-#if !defined (_WIN32) || defined(__MINGW32__)
-    dev->transfer = MIRISDR_TRANSFER_ISOC;
-#else
-    dev->transfer = MIRISDR_TRANSFER_BULK;
-#endif
+    dev->transfer = transfer;
 
     mirisdr_adc_init(dev);
     mirisdr_set_hard(dev);
@@ -141,7 +137,7 @@ failed:
     return -1;
 }
 
-int mirisdr_open (mirisdr_dev_t **p, uint32_t index) {
+int mirisdr_open (mirisdr_dev_t **p, uint32_t index, mirisdr_transfer_backend_t transfer) {
     mirisdr_dev_t *dev = NULL;
     libusb_device **list, *device = NULL;
     struct libusb_device_descriptor dd;

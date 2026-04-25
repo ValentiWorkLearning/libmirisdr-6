@@ -74,10 +74,7 @@ struct mirisdr_dev {
         MIRISDR_XTAL_26M,
         MIRISDR_XTAL_38_4M
     } xtal;
-    enum {
-        MIRISDR_TRANSFER_BULK = 0,
-        MIRISDR_TRANSFER_ISOC
-    } transfer;
+    mirisdr_transfer_backend_t transfer;
 
     /* async */
     enum {

@@ -32,6 +32,11 @@ extern "C" {
 #include <stdint.h>
 #include <mirisdr_export.h>
 
+typedef enum MIRIUSB_TRANSFER_BACKEND{
+    MIRISDR_TRANSFER_BULK = 0,
+    MIRISDR_TRANSFER_ISOC
+} mirisdr_transfer_backend_t;
+
 typedef enum
 {
     MIRISDR_HW_DEFAULT,
@@ -56,7 +61,7 @@ MIRISDR_API const char *mirisdr_get_device_name (uint32_t index);
 MIRISDR_API int mirisdr_get_device_usb_strings (uint32_t index, char *manufact, char *product, char *serial);
 
 /* main */
-MIRISDR_API int mirisdr_open (mirisdr_dev_t **p, uint32_t index);
+MIRISDR_API int mirisdr_open (mirisdr_dev_t **p, uint32_t index, mirisdr_transfer_backend_t transfer);
 MIRISDR_API int mirisdr_open_fd (mirisdr_dev_t **p, int fd);
 MIRISDR_API int mirisdr_close (mirisdr_dev_t *p);
 MIRISDR_API int mirisdr_reset (mirisdr_dev_t *p);                       /* extra */
