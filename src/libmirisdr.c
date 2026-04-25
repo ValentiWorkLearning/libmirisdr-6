@@ -188,7 +188,7 @@ int mirisdr_open (mirisdr_dev_t **p, uint32_t index, mirisdr_transfer_backend_t 
 
     libusb_free_device_list(list, 1);
 
-    return mirisdr_setup(p, dev);
+    return mirisdr_setup(p, dev, transfer);
 
 failed:
     if (dev) {
@@ -202,7 +202,7 @@ failed:
     return -1;
 }
 
-int mirisdr_open_fd (mirisdr_dev_t **p, int fd) {
+int mirisdr_open_fd (mirisdr_dev_t **p, int fd, mirisdr_transfer_backend_t transfer) {
     mirisdr_dev_t *dev = NULL;
     libusb_device **list, *device = NULL;
     struct libusb_device_descriptor dd;
@@ -233,7 +233,7 @@ int mirisdr_open_fd (mirisdr_dev_t **p, int fd) {
         return -1;
     }
 
-    return mirisdr_setup(p, dev);
+    return mirisdr_setup(p, dev, transfer);
 }
 
 int mirisdr_close (mirisdr_dev_t *p) {
