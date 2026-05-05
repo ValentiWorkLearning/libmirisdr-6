@@ -18,7 +18,9 @@
 # Boston, MA 02110-1301, USA.
 
 # Ensure dependencies are available in this scope
-find_package(Threads REQUIRED)
+if(BUILD_TEST_APPS)
+    find_package(Threads REQUIRED)
+endif()
 
 ########################################################################
 # Setup library
@@ -38,6 +40,7 @@ if(NOT TARGET libusb)
     endif()
 endif()
 
+if(BUILD_TEST_APPS)
 target_link_libraries(mirisdr_shared
     PRIVATE ${LIBUSB_LIBRARIES} Threads::Threads
 )
@@ -52,6 +55,7 @@ target_include_directories(mirisdr_shared PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
     $<INSTALL_INTERFACE:include>
 )
+endif(BUILD_TEST_APPS)
 
 add_library(mirisdr_static STATIC
     libmirisdr.c
@@ -64,7 +68,7 @@ add_library(libgetopt_static STATIC
 endif()
 
 target_link_libraries(mirisdr_static
-    PRIVATE ${LIBUSB_LIBRARIES} Threads::Threads
+    PRIVATE ${LIBUSB_LIBRARIES}
 )
 
 set_property(TARGET mirisdr_static APPEND PROPERTY COMPILE_DEFINITIONS "mirisdr_STATIC" )
@@ -83,6 +87,8 @@ target_include_directories(mirisdr_static PUBLIC
 ########################################################################
 # Build utility
 ########################################################################
+if(BUILD_TEST_APPS)
+
 add_executable(miri_sdr miri_sdr.c)
 add_executable(miri_fm miri_fm.c)
 set(INSTALL_TARGETS mirisdr_shared mirisdr_static miri_sdr miri_fm)
@@ -108,18 +114,32 @@ set_property(TARGET miri_sdr APPEND PROPERTY COMPILE_DEFINITIONS "mirisdr_STATIC
 set_property(TARGET miri_fm APPEND PROPERTY COMPILE_DEFINITIONS "mirisdr_STATIC" )
 endif()
 
+endif(BUILD_TEST_APPS)
+
 ########################################################################
 # Create namespace aliases for use in both build tree and via find_package
 ########################################################################
-add_library(mirisdr::mirisdr_shared ALIAS mirisdr_shared)
+if(BUILD_TEST_APPS)
+    add_library(mirisdr::mirisdr_shared ALIAS mirisdr_shared)
+endif(BUILD_TEST_APPS)
+
 add_library(mirisdr::mirisdr_static ALIAS mirisdr_static)
 
 ########################################################################
 # Install built library files & utilities
 ########################################################################
-install(TARGETS mirisdr_shared mirisdr_static
-    EXPORT mirisdr_targets
-    LIBRARY DESTINATION lib${LIB_SUFFIX} # .so/.dylib file
-    ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
-    RUNTIME DESTINATION bin              # .dll file
-)
+if(BUILD_TEST_APPS)
+    install(TARGETS mirisdr_shared mirisdr_static
+        EXPORT mirisdr_targets
+        LIBRARY DESTINATION lib${LIB_SUFFIX} # .so/.dylib file
+        ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
+        RUNTIME DESTINATION bin              # .dll file
+    )
+else()
+    install(TARGETS mirisdr_static
+        EXPORT mirisdr_targets
+        LIBRARY DESTINATION lib${LIB_SUFFIX} # .so/.dylib file
+        ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
+        RUNTIME DESTINATION bin              # .dll file
+    )
+endif(BUILD_TEST_APPS)
