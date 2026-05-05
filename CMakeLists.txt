@@ -85,8 +85,11 @@ if(NOT LIBUSB_FOUND AND NOT LIBUSB_LIBRARIES)
     message(FATAL_ERROR "LibUSB 1.0 required to compile MiriSDR. Install it via: brew install libusb (macOS) or apt install libusb-1.0-0-dev (Linux)")
 endif()
 
-set(THREADS_USE_PTHREADS_WIN32 true)
-find_package(Threads)
+option(BUILD_TEST_APPS "Enabled test apps building like miri_fm" ON)
+if(BUILD_TEST_APPS)
+    set(THREADS_USE_PTHREADS_WIN32 true)
+    find_package(Threads)
+endif(BUILD_TEST_APPS)
 
 ########################################################################
 # Setup the include and linker paths
