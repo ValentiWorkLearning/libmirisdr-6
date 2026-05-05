@@ -86,6 +86,8 @@ if(NOT LIBUSB_FOUND AND NOT LIBUSB_LIBRARIES)
 endif()
 
 option(BUILD_TEST_APPS "Enabled test apps building like miri_fm" ON)
+option(LIBMIRISDR_ENABLE_INSTALL "Enable install/export rules" ON)
+
 if(BUILD_TEST_APPS)
     set(THREADS_USE_PTHREADS_WIN32 true)
     find_package(Threads)
@@ -167,6 +169,7 @@ CONFIGURE_FILE(
     ${CMAKE_CURRENT_BINARY_DIR}/libmirisdr.pc
 @ONLY)
 
+if(LIBMIRISDR_ENABLE_INSTALL)
 INSTALL(
     FILES ${CMAKE_CURRENT_BINARY_DIR}/libmirisdr.pc
     DESTINATION lib${LIB_SUFFIX}/pkgconfig
@@ -202,6 +205,7 @@ install(EXPORT mirisdr_targets
     FILE mirisdrTargets.cmake
     DESTINATION lib${LIB_SUFFIX}/cmake/mirisdr
 )
+endif(LIBMIRISDR_ENABLE_INSTALL)
 
 ########################################################################
 # Print Summary

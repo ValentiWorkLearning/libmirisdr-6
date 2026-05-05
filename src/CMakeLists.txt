@@ -129,17 +129,21 @@ add_library(mirisdr::mirisdr_static ALIAS mirisdr_static)
 # Install built library files & utilities
 ########################################################################
 if(BUILD_TEST_APPS)
-    install(TARGETS mirisdr_shared mirisdr_static
-        EXPORT mirisdr_targets
-        LIBRARY DESTINATION lib${LIB_SUFFIX} # .so/.dylib file
-        ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
-        RUNTIME DESTINATION bin              # .dll file
-    )
+    if(LIBMIRISDR_ENABLE_INSTALL)
+        install(TARGETS mirisdr_shared mirisdr_static
+            EXPORT mirisdr_targets
+            LIBRARY DESTINATION lib${LIB_SUFFIX} # .so/.dylib file
+            ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
+            RUNTIME DESTINATION bin              # .dll file
+        )
+    endif(LIBMIRISDR_ENABLE_INSTALL)
 else()
-    install(TARGETS mirisdr_static
-        EXPORT mirisdr_targets
-        LIBRARY DESTINATION lib${LIB_SUFFIX} # .so/.dylib file
-        ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
-        RUNTIME DESTINATION bin              # .dll file
-    )
+    if(LIBMIRISDR_ENABLE_INSTALL)
+        install(TARGETS mirisdr_static
+            EXPORT mirisdr_targets
+            LIBRARY DESTINATION lib${LIB_SUFFIX} # .so/.dylib file
+            ARCHIVE DESTINATION lib${LIB_SUFFIX} # .lib file
+            RUNTIME DESTINATION bin              # .dll file
+        )
+    endif(LIBMIRISDR_ENABLE_INSTALL)
 endif(BUILD_TEST_APPS)

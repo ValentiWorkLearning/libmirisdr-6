@@ -20,8 +20,10 @@
 ########################################################################
 # Install public header files
 ########################################################################
+if(LIBMIRISDR_ENABLE_INSTALL)
 install(FILES
     mirisdr.h
     mirisdr_export.h
     DESTINATION include
 )
+endif(LIBMIRISDR_ENABLE_INSTALL)
