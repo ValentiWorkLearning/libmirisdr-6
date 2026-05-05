@@ -71,7 +71,7 @@ target_link_libraries(mirisdr_static
     PRIVATE ${LIBUSB_LIBRARIES}
 )
 
-set_property(TARGET mirisdr_static APPEND PROPERTY COMPILE_DEFINITIONS "mirisdr_STATIC" )
+target_compile_definitions(mirisdr_static PUBLIC "mirisdr_STATIC")
 
 if(NOT WIN32)
 # Force same library filename for static and shared variants of the library
