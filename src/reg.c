@@ -14,24 +14,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "libusb.h"
+
+#define REQ_OUT  (LIBUSB_ENDPOINT_OUT | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE)
+#define REQ_IN   (LIBUSB_ENDPOINT_IN  | LIBUSB_REQUEST_TYPE_VENDOR | LIBUSB_RECIPIENT_DEVICE)
 
 
-int mirisdr_write_reg (mirisdr_dev_t *p, uint8_t reg, uint32_t val) {
-    uint16_t value = (val & 0xff) << 8 | reg;
-    uint16_t index = (val >> 8) & 0xffff;
-
-    if (!p) goto failed;
-    if (!p->dh) goto failed;
-
-#if MIRISDR_DEBUG >= 2
-    fprintf( stderr, "write reg: 0x%02x, val 0x%08x\n", reg, val);
-#endif
-
-    return libusb_control_transfer(p->dh, 0x42, 0x41, value, index, NULL, 0, CTRL_TIMEOUT);
-
-failed:
-    return -1;
-}
 
 #define CMD_RESET              0x40
 #define CMD_WREG               0x41
@@ -56,3 +44,20 @@ GPIO(0x13) & 0x04 = BROADCAST_NOTCH
 
 
 */
+
+int mirisdr_write_reg (mirisdr_dev_t *p, uint8_t reg, uint32_t val) {
+    uint16_t value = (val & 0xff) << 8 | reg;
+    uint16_t index = (val >> 8) & 0xffff;
+
+    if (!p) goto failed;
+    if (!p->dh) goto failed;
+
+#if MIRISDR_DEBUG >= 2
+    fprintf( stderr, "write reg: 0x%02x, val 0x%08x\n", reg, val);
+#endif
+
+    return libusb_control_transfer(p->dh, REQ_OUT, CMD_WREG, value, index, NULL, 0, CTRL_TIMEOUT);
+
+failed:
+    return -1;
+}

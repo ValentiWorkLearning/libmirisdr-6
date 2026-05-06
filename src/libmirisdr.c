@@ -61,14 +61,14 @@ int mirisdr_setup (mirisdr_dev_t **out_dev, mirisdr_dev_t *dev, mirisdr_transfer
 
 #ifdef DETACH_KERNEL_DRIVER
         if (!libusb_detach_kernel_driver(dev->dh, 0)) {
-            fprintf(stderr, "Detached kernel driver\n");
+            fprintf(stdout, "Detached kernel driver\n");
         } else {
-            fprintf(stderr, "Detaching kernel driver failed!");
+            fprintf(stdout, "Detaching kernel driver failed!");
             dev->driver_active = 0;
             goto failed;
         }
 #else
-        fprintf(stderr, "\nKernel driver is active, or device is "
+        fprintf(stdout, "\nKernel driver is active, or device is "
                 "claimed by second instance of libmirisdr."
                 "\nIn the first case, please either detach"
                 " or blacklist the kernel module\n"
@@ -80,9 +80,9 @@ int mirisdr_setup (mirisdr_dev_t **out_dev, mirisdr_dev_t *dev, mirisdr_transfer
     }
 
     if ((r = libusb_claim_interface(dev->dh, 0)) < 0) {
-        fprintf(stderr, "failed to claim miri usb device %u with code %d: %s\n", dev->index, r, libusb_error_name(r));
+        fprintf(stdout, "failed to claim miri usb device %u with code %d: %s\n", dev->index, r, libusb_error_name(r));
         if (r == LIBUSB_ERROR_BUSY) {
-            fprintf(stderr, "Verify that the SDRplay background service is not running by `sudo systemctl stop sdrplay` and try again.\n");
+            fprintf(stdout, "Verify that the SDRplay background service is not running by `sudo systemctl stop sdrplay` and try again.\n");
         }
 
         goto failed;
@@ -160,6 +160,7 @@ int mirisdr_open (mirisdr_dev_t **p, uint32_t index, mirisdr_transfer_backend_t 
 #endif
 
     libusb_init(&dev->ctx);
+    //libusb_set_option(dev->ctx, LIBUSB_OPTION_LOG_LEVEL, LIBUSB_LOG_LEVEL_DEBUG);
     i_max = libusb_get_device_list(dev->ctx, &list);
 
     for (i = 0; i < i_max; i++) {
@@ -175,14 +176,14 @@ int mirisdr_open (mirisdr_dev_t **p, uint32_t index, mirisdr_transfer_backend_t 
     /* nenašli jsme zařízení */
     if (!device) {
         libusb_free_device_list(list, 1);
-        fprintf( stderr, "no miri device %u found\n", dev->index);
+        fprintf( stdout, "no miri device %u found\n", dev->index);
         goto failed;
     }
 
     /* otevření zařízení */
     if ((r = libusb_open(device, &dev->dh)) < 0) {
         libusb_free_device_list(list, 1);
-        fprintf( stderr, "failed to open miri usb device %u with code %d\n", dev->index, r);
+        fprintf( stdout, "failed to open miri usb device %u with code %d\n", dev->index, r);
         goto failed;
     }
 
@@ -257,9 +258,9 @@ int mirisdr_close (mirisdr_dev_t *p) {
 #ifdef DETACH_KERNEL_DRIVER
         if (p->driver_active) {
             if (!libusb_attach_kernel_driver(p->dh, 0))
-                fprintf(stderr, "Reattached kernel driver\n");
+                fprintf(stdout, "Reattached kernel driver\n");
             else
-                fprintf(stderr, "Reattaching kernel driver failed!\n");
+                fprintf(stdout, "Reattaching kernel driver failed!\n");
         }
 #endif
         if (p->async_status != MIRISDR_ASYNC_FAILED) {
@@ -288,7 +289,7 @@ int mirisdr_reset (mirisdr_dev_t *p) {
     /* měli bychom uvolnit zařízení předem? */
 
     if ((r = libusb_reset_device(p->dh)) < 0) {
-        fprintf( stderr, "failed to reset miri usb device %u with code %d\n", p->index, r);
+        fprintf( stdout, "failed to reset miri usb device %u with code %d\n", p->index, r);
         goto failed;
     }
 
@@ -314,7 +315,7 @@ failed:
 
 int mirisdr_get_usb_strings (mirisdr_dev_t *dev, char *manufact, char *product, char *serial) {
 (void) dev;
-    fprintf( stderr, "mirisdr_get_usb_strings not implemented yet\n");
+    fprintf( stdout, "mirisdr_get_usb_strings not implemented yet\n");
 
     memset(manufact, 0, 256);
     memset(product, 0, 256);

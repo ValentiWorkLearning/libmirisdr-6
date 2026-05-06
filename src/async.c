@@ -112,12 +112,15 @@ static void LIBUSB_CALL _libusb_callback(struct libusb_transfer *xfer)
     uint8_t *samples;
     int submit_r;
 
+    //printf("Calling libusb callback\r\n");
     if (!xfer) {
+        //printf("if (!xfer)\r\n");
         return;
     }
 
     p = (mirisdr_dev_t *)xfer->user_data;
     if (!p) {
+        // printf("if (!p)\r\n");
         return;
     }
 
@@ -128,6 +131,8 @@ static void LIBUSB_CALL _libusb_callback(struct libusb_transfer *xfer)
 
     if (p->async_status == MIRISDR_ASYNC_CANCELING ||
         p->async_shutdown_requested) {
+
+        //printf("p->async_status == MIRISDR_ASYNC_CANCELING || p->async_shutdown_requested\r\n");
         return;
     }
 
@@ -243,19 +248,22 @@ static void LIBUSB_CALL _libusb_callback(struct libusb_transfer *xfer)
             break;
 
         default:
-            fprintf(stderr, "not isoc or bulk transfer type on usb device: %u\n", p->index);
+            printf( "not isoc or bulk transfer type on usb device: %u\n", p->index);
             goto failed;
         }
 
         if (bytes > 0) {
             mirisdr_feed_async(p, samples, (uint32_t)bytes);
         }
+        else{
+            printf("pupu...There are no bytes...\r\n");
+        }
 
         if (xfer->type == LIBUSB_TRANSFER_TYPE_BULK) {
             if (p->sync_loss_cnt > (int)p->xfer_buf_num) {
                 p->sync_loss_cnt = -((int)p->xfer_buf_num) + 1;
                 xfer->length = DEFAULT_BULK_BUFFER - 512;
-                fprintf(stderr, "libmirisdr: Sync lost. Trying to synchronize.\n");
+                printf( "libmirisdr: Sync lost. Trying to synchronize.\n\r\n");
             } else {
                 xfer->length = DEFAULT_BULK_BUFFER;
             }
@@ -268,22 +276,22 @@ static void LIBUSB_CALL _libusb_callback(struct libusb_transfer *xfer)
 
         submit_r = mirisdr_submit_and_track(p, xfer);
         if (submit_r == LIBUSB_ERROR_BUSY) {
-            fprintf(stderr, "warning re-submitting URB on device %u: BUSY\n", p->index);
+            printf( "warning re-submitting URB on device %u: BUSY\n", p->index);
             return;
         }
         if (submit_r == LIBUSB_ERROR_NO_DEVICE) {
-            fprintf(stderr, "device disappeared while re-submitting URB on device %u\n", p->index);
+            printf( "device disappeared while re-submitting URB on device %u\n", p->index);
             goto failed;
         }
         if (submit_r < 0) {
-            fprintf(stderr, "error re-submitting URB on device %u, code %d\n", p->index, submit_r);
+            printf( "error re-submitting URB on device %u, code %d\n", p->index, submit_r);
             goto failed;
         }
 
     } else if (xfer->status == LIBUSB_TRANSFER_CANCELLED) {
         return;
     } else {
-        fprintf(stderr, "error async transfer status %d on device %u\n", xfer->status, p->index);
+        printf( "error async transfer status %d on device %u\n", xfer->status, p->index);
         goto failed;
     }
 
@@ -485,7 +493,7 @@ static int mirisdr_wait_all_transfers_done(mirisdr_dev_t *p)
     while (p->xfers_in_flight > 0) {
         r = libusb_handle_events_timeout(p->ctx, &tv);
         if (r < 0 && r != LIBUSB_ERROR_INTERRUPTED) {
-            fprintf(stderr, "libusb_handle_events returned while draining: %d\n", r);
+            printf( "libusb_handle_events returned while draining: %d\n", r);
             return -1;
         }
     }
@@ -515,18 +523,18 @@ int mirisdr_read_async(mirisdr_dev_t *p, mirisdr_read_async_cb_t cb, void *ctx, 
     switch (p->transfer) {
     case MIRISDR_TRANSFER_BULK:
         if ((r = libusb_set_interface_alt_setting(p->dh, 0, 3)) < 0) {
-            fprintf(stderr, "failed to use alternate setting for Bulk mode on miri usb device %u with code %d\n", p->index, r);
+            printf( "failed to use alternate setting for Bulk mode on miri usb device %u with code %d\n", p->index, r);
         }
         break;
 
     case MIRISDR_TRANSFER_ISOC:
         if ((r = libusb_set_interface_alt_setting(p->dh, 0, 1)) < 0) {
-            fprintf(stderr, "failed to use alternate setting for Isochronous mode on miri usb device %u with code %d\n", p->index, r);
+            printf( "failed to use alternate setting for Isochronous mode on miri usb device %u with code %d\n", p->index, r);
         }
         break;
 
     default:
-        fprintf(stderr, "unsupported transfer type on miri usb device %u\n", p->index);
+        printf( "unsupported transfer type on miri usb device %u\n", p->index);
         goto failed;
     }
 
@@ -561,13 +569,13 @@ int mirisdr_read_async(mirisdr_dev_t *p, mirisdr_read_async_cb_t cb, void *ctx, 
             break;
 
         default:
-            fprintf(stderr, "unsupported transfer type\n");
+            printf( "unsupported transfer type\n\r\n");
             goto failed_cancel;
         }
 
         r = mirisdr_submit_and_track(p, p->xfer[i]);
         if (r < 0) {
-            fprintf(stderr, "Failed to submit transfer %lu reason: %d\n", (unsigned long)i, r);
+            printf( "Failed to submit transfer %lu reason: %d\n", (unsigned long)i, r);
             goto failed_cancel;
         }
     }
@@ -578,7 +586,7 @@ int mirisdr_read_async(mirisdr_dev_t *p, mirisdr_read_async_cb_t cb, void *ctx, 
     while (p->async_status != MIRISDR_ASYNC_INACTIVE) {
         r = libusb_handle_events_timeout(p->ctx, &tv);
         if (r < 0) {
-            fprintf(stderr, "libusb_handle_events returned: %d\n", r);
+            printf( "libusb_handle_events returned: %d\n", r);
             if (r == LIBUSB_ERROR_INTERRUPTED) continue;
             goto failed_cancel;
         }
