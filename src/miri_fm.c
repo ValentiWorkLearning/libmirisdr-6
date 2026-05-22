@@ -1322,7 +1322,7 @@ int main(int argc, char **argv)
 		exit(1);
 	}
 
-	r = mirisdr_open(&dongle.dev, (uint32_t)dongle.dev_index);
+	r = mirisdr_open(&dongle.dev, (uint32_t)dongle.dev_index, MIRISDR_TRANSFER_ISOC);
 	if (r < 0) {
 		fprintf(stderr, "Failed to open Mirics device #%d.\n", dongle.dev_index);
 		exit(1);
